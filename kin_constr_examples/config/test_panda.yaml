@@ -1,0 +1,99 @@
+# INFO:
+# This yaml file defines parameters needed for the kinematically constrained planning, which are written to the ROS parameter server.
+# Don't delete any parameters, otherwise failures could occur. If some are not needed, assign empty values to them.
+# For double valued parameters, always add a dot (e.g. 1.0 instead of 1). The yaml interface is not smart enough to convert integer to double.  
+
+# General configuration settings for planning
+kin_constr_planning_config:
+  parameters:
+    group: panda_arm                    # Group used for planning
+    fixed_frame: base            # Parent frame of all defined poses
+    allowed_planning_time: 10.0   # Max. time used for planning
+    planner_id: RRTConnect           # Planning algorithm
+    velocity_factor: 0.5         # Downscale joint velocity by this factor
+    acceleration_factor: 0.5     # Downscale joint acceleration by this factor
+
+  # Definition of the start robot configuration.
+  # Specify either a predefined pose taken from SRDF, a joint configuration or a target pose for the end effector + offset (xyzrpy)
+  start_configuration:     
+    start_frame_id: base       
+    start_predefined_pose: "" #"transport_cup"
+    start_joint_positions: [1.69811,1.0279,-2.03151,-1.65052,-1.66296,3.53554,0.307999]
+    start_pose_xyzrpy: [] #[0.6, 0.3, 0.65, 0.0, 1.570796327, 0.0]
+    start_pose_offset: [0.0, 0.0, 0.1, 0.0, 0.0, -0.8]
+  
+  # Definition of the goal robot configuration. 
+  goal_configuration:
+    goal_frame_id: base
+    goal_predefined_pose: ""
+    goal_joint_positions: [] #[0.244984,  0.320148, 0.0490722,  -1.99496, -0.776383,   0.90147,  0.271197]
+    goal_pose_xyzrpy: [0.6, -0.3, 0.7, 0.0, 1.570796327, 0.0] 
+    goal_pose_offset: [0.0, 0.0, 0.1, 0.0, 0.0, -0.8]
+    goal_pose_tolerance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    goal_link: panda_link8
+
+  # Kinematic constraint information
+  constraint:
+    name: ee_orientation_constraint
+
+    # Definition of fixed task frame
+    frame_id: base
+    pose_xyzrpy: [0.0, 0.0, 0.0, 0.0, 1.570796327, 0.0]
+
+    # Target to constrain
+    link: panda_link8
+    offset_pose: [0.0, 0.0, 0.1, 0.0, 0.0, -0.8]
+    motion_constraint_vector: [0, 0, 0, 0, 1, 1]
+    tolerance_vector: [0.0, 0.0, 0.0, 0.0, 0.5, 0.0]
+    epsilon: 5.0e-06
+
+    orientation_error_type_rpy: true
+
+# Further configurations needed for constrained planning specified for each group (will be added to planner config inside planning pipeline)
+# This has to start with the group name:
+panda_arm:
+  constraint_function_type: Vector  # Default "Scalar", Other options: "ScalarWithTolLin", "ScalarWithTolSqd", "Vector", "VectorWithTolLin", "VectorWithTolSqd"
+  constraint_adherence_method: ProjectedStateSpace # Default: "ProjectedStateSpace", Other options: "AtlasStateSpace", "TangentBundleStateSpace"
+  optimization_objective: PathLengthOptimizationObjective
+  longest_valid_segment_fraction: 0.01
+  delta: 0.05
+
+# Obstacles defined in environment
+obstacles:
+- orientation:
+  - 0.0
+  - 0.0
+  - 0.0
+  # Frame in which the coordinates are described
+  frame_id: base
+  position:
+  - 0.5
+  - 0.05
+  - 0.35
+  type: BOX
+  dimension:
+  - 0.05
+  - 0.05
+  - 0.7
+  name: pole
+
+# Objects to be attached to robot
+# attached_objects:
+# - name: pseudo_gripper
+#   frame_id: panda_link8
+#   position:
+#   - 0.0
+#   - 0.0
+#   - 0.2
+#   orientation:
+#   - 0.0
+#   - 0.0
+#   - 0.785398
+#   dimension:
+#   - 0.2
+#   - 0.2
+#   - 0.2
+#   type: BOX
+#   adjacent_links:
+#   - panda_link8
+#   - panda_hand

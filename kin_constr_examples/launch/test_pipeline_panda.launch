@@ -1,0 +1,26 @@
+<launch>
+    <!-- Debug Info -->
+    <arg name="debug" default="false" />
+    <arg unless="$(arg debug)" name="launch_prefix" value="" />
+    <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+    <arg name="planning_plugin" value="kin_constr/KinConstrPlanner" />
+    <!-- <arg name="planning_adapters" value="dyn_constr_planner_request_adapters/AddDownSampling
+                                        dyn_constr_planner_request_adapters/AddTiltingCompensation1
+                                        dyn_constr_planner_request_adapters/AddExponentialFiltering
+                                        dyn_constr_planner_request_adapters/AddIterativeSplineParameterizationEquidistantTime" /> -->
+    
+    <arg name="planning_adapters" value="default_planner_request_adapters/AddIterativeSplineParameterization 
+                                            default_planner_request_adapters/FixWorkspaceBounds 
+                                            default_planner_request_adapters/FixStartStateBounds
+                                            default_planner_request_adapters/FixStartStateCollision" />    
+   
+
+    <node name="test_pipeline_panda" pkg="kin_constr_examples" type="test_pipeline_panda" respawn="false" launch-prefix="$(arg launch_prefix)" output="screen">
+        <param name="planning_plugin" value="$(arg planning_plugin)" />
+        <param name="request_adapters" value="$(arg planning_adapters)" />
+        <param name="start_state_max_bounds_error" value="0.1" />
+        <param name="down_sampling_factor" value="10" />
+        <rosparam command="load" file="$(find panda_base_moveit_config)/config/ompl_planning.yaml"/>
+        <rosparam command="load" file="$(find kin_constr_examples)/config/test_panda.yaml"/>
+    </node>
+</launch>

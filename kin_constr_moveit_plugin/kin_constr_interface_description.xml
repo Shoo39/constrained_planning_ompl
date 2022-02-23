@@ -1,0 +1,7 @@
+ <library path="libkin_constr_moveit_plugin">
+  <class name="kin_constr/KinConstrPlanner" type="kin_constr::KinConstrPlannerManager" base_class_type="planning_interface::PlannerManager">
+    <description>
+      Kinematically (geometrically) constrained motion planning using OMPL.
+    </description>
+  </class>
+</library>
