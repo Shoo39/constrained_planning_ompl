@@ -1,6 +1,4 @@
 #include <pluginlib/class_loader.h>
-#include <rosbag/bag.h>
-#include <rosbag/view.h>
 #include <ros/ros.h>
 #include <ros/package.h>
 
@@ -27,23 +25,6 @@
 #include "kin_constraint.h"
 #include "utils.h"
 
-namespace rvt = rviz_visual_tools;
-
-void doneCallBack(const actionlib::SimpleClientGoalState& state, const moveit_msgs::ExecuteTrajectoryResultConstPtr &result)
-{
-    ROS_INFO_STREAM("Finished in state " << state.toString());
-    ROS_INFO_STREAM("Error code: " << result->error_code);
-}
-
-void activeCallBack()
-{
-    ROS_INFO_STREAM("Goal went active.");
-}
-
-void feedbackCallBack(const moveit_msgs::ExecuteTrajectoryFeedbackConstPtr& feedback)
-{
-    ROS_INFO_STREAM("Feedback: " << feedback->state);
-}
 
 int main(int argc, char** argv)
 {
@@ -83,7 +64,7 @@ int main(int argc, char** argv)
 
     /* Visualization */
     std::string frame = std::string(config_params["fixed_frame"]);
-    moveit_visual_tools::MoveItVisualTools visual_tools(frame, "/visualization_marker_array");
+    moveit_visual_tools::MoveItVisualTools visual_tools(frame, "/rviz_visual_tools");
     visual_tools.loadRobotStatePub("/display_robot_state");
     visual_tools.deleteAllMarkers();  // clear all old markers
     ros::Duration(1.0).sleep();
@@ -93,7 +74,7 @@ int main(int argc, char** argv)
 
     Eigen::Isometry3d text_pose = Eigen::Isometry3d::Identity();
     text_pose.translation().z() = 1.2;
-    visual_tools.publishText(text_pose, "Motion Planning Pipeline Demo", rvt::WHITE, rvt::XLARGE, true);
+    visual_tools.publishText(text_pose, "Motion Planning Pipeline Demo", rviz_visual_tools::WHITE, rviz_visual_tools::XLARGE, true);
     ros::Duration(1.0).sleep();     // Without waiting text won't be recognized and therefore not displayed
     visual_tools.trigger();
 
@@ -220,85 +201,11 @@ int main(int argc, char** argv)
             
             myfile << time << " " << pos.transpose() << " " << vel.transpose() << " " << acc.transpose() << "\n";
 
-            // Eigen::Vector3d position = end_effector_transform.translation();
-            // Eigen::MatrixXd J = res.trajectory_->getWayPoint(k).getJacobian(joint_model_group);
-
-            // Eigen::VectorXd joint_vel;
-            // res.trajectory_->getWayPoint(k).copyJointGroupVelocities(joint_model_group, joint_vel);
-            // Eigen::Vector3d velocity = J.block<3,7>(0,0) * joint_vel;          
-
-            // double time = res.trajectory_->getWayPointDurationFromStart(k);
-
-            // std::cout << "Index: " << k << "\n\tPosition: " << position.transpose() 
-            //             << "\n\tVelocity: " << velocity.transpose() << std::endl; 
-
             pose_msg = tf2::toMsg(end_effector_transform);
             visual_tools.publishAxis(pose_msg);
         }
         visual_tools.trigger();
         visual_tools.prompt("Press 'next' ");
-        // myfile.close();
-
-        // auto repaired_trajectory = repairTrajectory(res.trajectory_);
-        // auto new_trajectory = createEquidistantTimeTrajectory(repaired_trajectory, 0.01);
-        // auto new_trajectory = createEquidistantTimeTrajectory(res.trajectory_, 0.01);
-
-        // myfile.open("/home/isshu/data2.dat", std::ios::app);
-
-        // for (int k=0; k<new_trajectory->getWayPointCount(); k++){
-
-        //     Eigen::Isometry3d end_effector_transform = new_trajectory->getWayPoint(k).getGlobalLinkTransform(std::string(constraint_list["link"])) * T_offset;
-        //     Eigen::Vector3d pos = end_effector_transform.translation();
-
-        //     robot_state::RobotState rs(new_trajectory->getWayPoint(k));
-
-        //     Eigen::VectorXd q;
-        //     rs.copyJointGroupPositions(joint_model_group, q);
-        //     Eigen::VectorXd q_dot;
-        //     rs.copyJointGroupVelocities(joint_model_group, q_dot);
-        //     Eigen::VectorXd q_ddot;
-        //     rs.copyJointGroupAccelerations(joint_model_group, q_ddot);
-            
-
-        //     Eigen::MatrixXd J = rs.getJacobian(joint_model_group, T_offset.translation());
-        //     Eigen::MatrixXd J_dot = getJacobianDerivative(rs, joint_model_group, T_offset.translation(), q_dot);
-
-        //     Eigen::Vector3d vel = J.block<3, 7>(0,0) * q_dot;
-        //     Eigen::Vector3d acc = J_dot.block<3,7>(0, 0) * q_dot + J.block<3, 7>(0,0) * q_ddot;
-
-        //     double time = new_trajectory->getWayPointDurationFromStart(k);
-            
-        //     myfile << time << " " << pos.transpose() << " " << vel.transpose() << " " << acc.transpose() << "\n";
-
-        //     // if (k==0){
-        //     //     res.trajectory_->getWayPoint(k).copyJointGroupPositions(joint_model_group, prev_joint_positions);
-        //     // }
-        //     // else{
-        //     //     res.trajectory_->getWayPoint(k).copyJointGroupPositions(joint_model_group, current_joint_positions);
-        //     //     // std::cout << "Difference btw joint positions" << (current_joint_positions-prev_joint_positions).norm() << std::endl;
-        //     //     prev_joint_positions = current_joint_positions;
-        //     // }
-        // }
-        // myfile.close();
-
-        // Eigen::VectorXd final_joint_positions;
-        // res.trajectory_->getWayPoint(res.trajectory_->getWayPointCount()-1).copyJointGroupPositions(joint_model_group, final_joint_positions);
-
-        // std::cout << "Final joint positions: " << final_joint_positions.transpose() << std::endl;
-
-        // visual_tools.trigger();
-
-        // display_publisher.publish(display_trajectory);
-
-
-        // visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to move");
-
-        // actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction> client("execute_trajectory", true);
-        // client.waitForServer();
-        // moveit_msgs::ExecuteTrajectoryGoal goal;
-        // goal.trajectory = response.trajectory;
-
-        // client.sendGoal(goal, &doneCallBack, &activeCallBack, &feedbackCallBack);
     }
 
     std::vector<std::string> object_ids;

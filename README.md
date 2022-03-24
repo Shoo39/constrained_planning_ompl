@@ -13,7 +13,7 @@ https://user-images.githubusercontent.com/86610929/155374708-92065ac7-0c0b-447f-
 
 For quick start, clone this package into the moveit workspace and build it. Then open the panda RVIZ gui by calling 
  
-`roslaunch panda_base_moveit_config demo.launch`
+`roslaunch panda_moveit_config demo.launch`
   
 and start planning by calling
 

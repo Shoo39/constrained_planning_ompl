@@ -248,7 +248,7 @@ void KinConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd>& x, Eigen::
         out = calcErrorWithTol(x).transpose() * C_ * J;
     }
     else{
-        out = Eigen::VectorXd(getCoDimension(), num_dofs_);
+        out = Eigen::MatrixXd(getCoDimension(), num_dofs_);
     
         int counter = 0;
         for(int i=0; i<6; i++){

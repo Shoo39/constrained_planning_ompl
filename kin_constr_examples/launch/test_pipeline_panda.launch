@@ -20,7 +20,7 @@
         <param name="request_adapters" value="$(arg planning_adapters)" />
         <param name="start_state_max_bounds_error" value="0.1" />
         <param name="down_sampling_factor" value="10" />
-        <rosparam command="load" file="$(find panda_base_moveit_config)/config/ompl_planning.yaml"/>
+        <rosparam command="load" file="$(find panda_moveit_config)/config/ompl_planning.yaml"/>
         <rosparam command="load" file="$(find kin_constr_examples)/config/test_panda.yaml"/>
     </node>
 </launch>
